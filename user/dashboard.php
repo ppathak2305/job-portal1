@@ -1,5 +1,10 @@
 <?php
 session_start();
+if(empty($_SESSION['userid'])){
+    header("Location: ../index_dbms.php");
+    exit();
+}
+require_once("db.php");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,11 +43,94 @@ session_start();
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav navbar-right">
-        <li ><a href="../logout.php">Logout</a></li>
+        <li ><a href="resume.php">Resume</a></li>
+        <li ><a href="profile.php">Profile</a></li>
+        <li ><a href="logout.php">Logout</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
+
+<div class="container">
+
+  <?php 
+  if(isset($_SESSION['jobApplied'])) { ?>
+  <div class="row">
+    <div class="col-md-12">
+      Successfully Applied!
+    </div>
+  </div>
+
+  <?php 
+  unset($_SESSION['jobApplied']);
+}
+?>
+     <div class="row">
+       <div class="col-md-12">
+         <div class="table-responsive">
+          <h2 class="text-center"><u>Job Vacancies</u></h2>
+           <table class="table table-striped">
+            <thead>
+             <th>Job Name</th>
+             <th>Job Description</th>
+             <th>Minimum Salary</th>
+             <th>Maximum Salary</th>
+             <th>Experience</th>
+             <th>Qualification</th>
+             <th>Created At</th>
+             <th>Action</th>
+           </thead>
+           <tbody>
+             <?php
+                $sql="SELECT * FROM jobposts";
+                $result=$conn->query($sql);
+
+                if($result->num_rows >0){
+                while($row=$result->fetch_assoc())
+                {
+                   $sql1="SELECT * FROM applied_jobs WHERE id_user='$_SESSION[userid]' AND id_jobpost='$row[id_jobpost]'";
+                  $result1=$conn->query($sql1);
+
+                  
+                  ?>
+                  <tr>
+                    <td><?php echo $row['jobtitle']; ?></td>
+                    <td><?php echo $row['description']; ?></td>
+                    <td><?php echo $row['minsalary']; ?></td>
+                    <td><?php echo $row['maxsalary']; ?></td>
+                    <td><?php echo $row['experience']; ?></td>
+                    <td><?php echo $row['qualification']; ?></td>
+                    <td><?php echo $row['createdat']; ?></td>
+                    <?php
+                  if($result1->num_rows >0){
+                    ?>
+                    <td><strong>Applied</strong></td>
+                    <?php
+                  }else
+                  {
+                    ?>
+                    <td><a href="apply_confirm.php?id=<?php echo $row['id_jobpost']; ?>"> Apply </a></td>
+                    <?php } ?>
+                    
+                  </tr>
+                  <?php 
+                }
+              }
+                $conn->close();
+             ?>
+           </tbody>
+         </table>
+         </div>
+       </div>
+     </div>
+   </div>
+   <div class="container text-center">
+   <div class="row">
+     <div class="col-md-4 col-md-offset-4">
+       <a class="bt btn-success btn-block btn-lg" href="applications.php">My Applications</a>
+     </div>
+   </div>
+ </div>
     </header>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
